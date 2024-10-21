@@ -1,3 +1,5 @@
+from collections import Counter
+
 class Diccionario:
     def __init__(self):
         self.palabra_a_codigo = {}
@@ -22,11 +24,7 @@ class Diccionario:
 
     def actualizar_frecuencias(self, texto):
         palabras = texto.lower().split()
-        for palabra in palabras:
-            if palabra in self.frecuencias:
-                self.frecuencias[palabra] += 1
-            else:
-                self.frecuencias[palabra] = 1
+        self.frecuencias = Counter(palabras)
 
     def optimizar_diccionario(self):
         palabras_comunes = sorted(self.frecuencias, key=self.frecuencias.get, reverse=True)[:1000]
@@ -101,7 +99,7 @@ def calcular_tamano(texto):
 def main():
     print("Ingrese el texto a comprimir:")
     texto_original = input().strip()
-    
+
     texto_comprimido = comprimir_texto(texto_original)
 
     print("\nResultados:")
