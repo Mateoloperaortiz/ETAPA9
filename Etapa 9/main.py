@@ -28,11 +28,15 @@ class Diccionario:
 
     def optimizar_diccionario(self):
         palabras_comunes = sorted(self.frecuencias, key=self.frecuencias.get, reverse=True)[:1000]
+        palabras_existentes = set(self.palabra_a_codigo.keys())
         self.palabra_a_codigo = {}
         self.codigo_a_palabra = {}
         self.codigo_actual = 0
         for palabra in palabras_comunes:
             self.agregar_palabra(palabra)
+        for palabra in palabras_existentes:
+            if palabra not in self.palabra_a_codigo:
+                self.agregar_palabra(palabra)
 
 diccionario_global = Diccionario()
 
