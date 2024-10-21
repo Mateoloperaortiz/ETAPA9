@@ -1,99 +1,98 @@
-def crear_diccionario():
-    palabras = [
-        # Palabras del ejemplo
-        "el", "sol", "brillaba", "en", "cielo", "azul", "sin", 
-        "nubes", "radiante", "y", "sereno",
-        
-        # Artículos y determinantes
-        "la", "los", "las", "un", "una", "unos", "unas",
-        
-        # Verbos comunes
-        "es", "está", "era", "fue", "ser", "estar", "hacer",
-        "tiene", "va", "dice", "hacer", "ver", "dar", "saber",
-        
-        # Sustantivos comunes
-        "día", "tiempo", "año", "vida", "mundo", "casa", "agua",
-        "tierra", "aire", "fuego", "mar", "montaña", "río",
-        
-        # Adjetivos comunes
-        "grande", "pequeño", "bueno", "malo", "alto", "bajo",
-        "feliz", "triste", "hermoso", "feo", "claro", "oscuro",
-        
-        # Preposiciones y conjunciones
-        "de", "a", "con", "por", "para", "entre", "sobre",
-        "pero", "mas", "aunque", "sino", "porque", "pues",
-        
-        # Adverbios
-        "muy", "bien", "mal", "así", "ahora", "después",
-        "antes", "cerca", "lejos", "siempre", "nunca",
-        
-        # Pronombres
-        "yo", "tú", "él", "ella", "nosotros", "vosotros",
-        "ellos", "ellas", "me", "te", "se", "nos", "os"
-    ]
-    
-    diccionario = {}
-    for i, palabra in enumerate(palabras):
-        diccionario[palabra] = str(i)
-    return diccionario
+class Diccionario:
+    def __init__(self):
+        self.palabra_a_codigo = {}
+        self.codigo_a_palabra = {}
+        self.frecuencias = {}
+        self.codigo_actual = 0
+
+    def agregar_palabra(self, palabra):
+        if palabra not in self.palabra_a_codigo:
+            codigo = str(self.codigo_actual)
+            self.palabra_a_codigo[palabra] = codigo
+            self.codigo_a_palabra[codigo] = palabra
+            self.codigo_actual += 1
+
+    def obtener_codigo(self, palabra):
+        if palabra not in self.palabra_a_codigo:
+            self.agregar_palabra(palabra)
+        return self.palabra_a_codigo[palabra]
+
+    def obtener_palabra(self, codigo):
+        return self.codigo_a_palabra.get(codigo, codigo)
+
+    def actualizar_frecuencias(self, texto):
+        palabras = texto.lower().split()
+        for palabra in palabras:
+            if palabra in self.frecuencias:
+                self.frecuencias[palabra] += 1
+            else:
+                self.frecuencias[palabra] = 1
+
+    def optimizar_diccionario(self):
+        palabras_comunes = sorted(self.frecuencias, key=self.frecuencias.get, reverse=True)[:1000]
+        self.palabra_a_codigo = {}
+        self.codigo_a_palabra = {}
+        self.codigo_actual = 0
+        for palabra in palabras_comunes:
+            self.agregar_palabra(palabra)
+
+diccionario_global = Diccionario()
 
 def comprimir_texto(texto):
-
-    diccionario = crear_diccionario()
-
-    texto = texto.lower()
+    diccionario_global.actualizar_frecuencias(texto)
+    diccionario_global.optimizar_diccionario()
 
     resultado = []
     palabra_actual = ""
-    
     for caracter in texto:
         if caracter.isalpha():
             palabra_actual += caracter
         else:
             if palabra_actual:
-                if palabra_actual in diccionario:
-                    resultado.append(diccionario[palabra_actual])
+                if palabra_actual.lower() in diccionario_global.palabra_a_codigo:
+                    codigo = diccionario_global.obtener_codigo(palabra_actual.lower())
+                    if palabra_actual[0].isupper():
+                        resultado.append(f"{codigo}^")  # Indicador para mayúscula
+                    else:
+                        resultado.append(codigo)
                 else:
                     resultado.append(palabra_actual)
                 palabra_actual = ""
             resultado.append(caracter)
-
     if palabra_actual:
-        if palabra_actual in diccionario:
-            resultado.append(diccionario[palabra_actual])
+        if palabra_actual.lower() in diccionario_global.palabra_a_codigo:
+            codigo = diccionario_global.obtener_codigo(palabra_actual.lower())
+            if palabra_actual[0].isupper():
+                resultado.append(f"{codigo}^")
+            else:
+                resultado.append(codigo)
         else:
             resultado.append(palabra_actual)
-    
     return "".join(resultado)
 
 def descomprimir_texto(texto_comprimido):
-
-    diccionario = crear_diccionario()
-    diccionario_inverso = {}
-    for palabra, codigo in diccionario.items():
-        diccionario_inverso[codigo] = palabra
-
     resultado = []
     numero = ""
-    
+    mayuscula = False
     for caracter in texto_comprimido:
         if caracter.isdigit():
             numero += caracter
+        elif caracter == "^":
+            mayuscula = True
         else:
             if numero:
-                if numero in diccionario_inverso:
-                    resultado.append(diccionario_inverso[numero])
-                else:
-                    resultado.append(numero)
+                palabra = diccionario_global.obtener_palabra(numero)
+                if mayuscula:
+                    palabra = palabra.capitalize()
+                    mayuscula = False
+                resultado.append(palabra)
                 numero = ""
             resultado.append(caracter)
-
     if numero:
-        if numero in diccionario_inverso:
-            resultado.append(diccionario_inverso[numero])
-        else:
-            resultado.append(numero)
-    
+        palabra = diccionario_global.obtener_palabra(numero)
+        if mayuscula:
+            palabra = palabra.capitalize()
+        resultado.append(palabra)
     return "".join(resultado)
 
 def calcular_tamano(texto):
@@ -101,8 +100,8 @@ def calcular_tamano(texto):
 
 def main():
     print("Ingrese el texto a comprimir:")
-    texto_original = input()
-
+    texto_original = input().strip()
+    
     texto_comprimido = comprimir_texto(texto_original)
 
     print("\nResultados:")
