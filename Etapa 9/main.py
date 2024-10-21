@@ -4,7 +4,7 @@ class Diccionario:
     def __init__(self):
         self.palabra_a_codigo = {}
         self.codigo_a_palabra = {}
-        self.frecuencias = {}
+        self.frecuencias = Counter()
         self.codigo_actual = 0
 
     def agregar_palabra(self, palabra):
@@ -24,17 +24,18 @@ class Diccionario:
 
     def actualizar_frecuencias(self, texto):
         palabras = texto.lower().split()
-        self.frecuencias = Counter(palabras)
+        self.frecuencias.update(palabras)
 
     def optimizar_diccionario(self):
         palabras_comunes = sorted(self.frecuencias, key=self.frecuencias.get, reverse=True)[:1000]
         palabras_existentes = set(self.palabra_a_codigo.keys())
+        palabras_retenidas = sorted(palabras_existentes, key=lambda palabra: self.frecuencias.get(palabra, 0), reverse=True)[:500]
         self.palabra_a_codigo = {}
         self.codigo_a_palabra = {}
         self.codigo_actual = 0
         for palabra in palabras_comunes:
             self.agregar_palabra(palabra)
-        for palabra in palabras_existentes:
+        for palabra in palabras_retenidas:
             if palabra not in self.palabra_a_codigo:
                 self.agregar_palabra(palabra)
 
