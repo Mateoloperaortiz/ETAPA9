@@ -45,7 +45,7 @@ def comprimir_texto(texto, diccionario):
     resultado = []
     palabra_actual = ""
     for caracter in texto:
-        if caracter.isalpha():
+        if caracter.isalnum() or caracter == "'":
             palabra_actual += caracter
         else:
             if palabra_actual:
