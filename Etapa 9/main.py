@@ -38,11 +38,9 @@ class Diccionario:
             if palabra not in self.palabra_a_codigo:
                 self.agregar_palabra(palabra)
 
-diccionario_global = Diccionario()
-
-def comprimir_texto(texto):
-    diccionario_global.actualizar_frecuencias(texto)
-    diccionario_global.optimizar_diccionario()
+def comprimir_texto(texto, diccionario):
+    diccionario.actualizar_frecuencias(texto)
+    diccionario.optimizar_diccionario()
 
     resultado = []
     palabra_actual = ""
@@ -51,8 +49,8 @@ def comprimir_texto(texto):
             palabra_actual += caracter
         else:
             if palabra_actual:
-                if palabra_actual.lower() in diccionario_global.palabra_a_codigo:
-                    codigo = diccionario_global.obtener_codigo(palabra_actual.lower())
+                if palabra_actual.lower() in diccionario.palabra_a_codigo:
+                    codigo = diccionario.obtener_codigo(palabra_actual.lower())
                     if palabra_actual[0].isupper():
                         resultado.append(f"{codigo}^")  # Indicador para mayúscula
                     else:
@@ -62,8 +60,8 @@ def comprimir_texto(texto):
                 palabra_actual = ""
             resultado.append(caracter)
     if palabra_actual:
-        if palabra_actual.lower() in diccionario_global.palabra_a_codigo:
-            codigo = diccionario_global.obtener_codigo(palabra_actual.lower())
+        if palabra_actual.lower() in diccionario.palabra_a_codigo:
+            codigo = diccionario.obtener_codigo(palabra_actual.lower())
             if palabra_actual[0].isupper():
                 resultado.append(f"{codigo}^")
             else:
@@ -72,7 +70,7 @@ def comprimir_texto(texto):
             resultado.append(palabra_actual)
     return "".join(resultado)
 
-def descomprimir_texto(texto_comprimido):
+def descomprimir_texto(texto_comprimido, diccionario):
     resultado = []
     numero = ""
     mayuscula = False
@@ -83,7 +81,7 @@ def descomprimir_texto(texto_comprimido):
             mayuscula = True
         else:
             if numero:
-                palabra = diccionario_global.obtener_palabra(numero)
+                palabra = diccionario.obtener_palabra(numero)
                 if mayuscula:
                     palabra = palabra.capitalize()
                     mayuscula = False
@@ -91,7 +89,7 @@ def descomprimir_texto(texto_comprimido):
                 numero = ""
             resultado.append(caracter)
     if numero:
-        palabra = diccionario_global.obtener_palabra(numero)
+        palabra = diccionario.obtener_palabra(numero)
         if mayuscula:
             palabra = palabra.capitalize()
         resultado.append(palabra)
@@ -101,10 +99,11 @@ def calcular_tamano(texto):
     return len(texto.encode('utf-8'))
 
 def main():
+    diccionario = Diccionario()
     print("Ingrese el texto a comprimir:")
     texto_original = input().strip()
 
-    texto_comprimido = comprimir_texto(texto_original)
+    texto_comprimido = comprimir_texto(texto_original, diccionario)
 
     print("\nResultados:")
     print(f"Texto original ({calcular_tamano(texto_original)} bytes):")
@@ -112,7 +111,7 @@ def main():
     print(f"\nTexto comprimido ({calcular_tamano(texto_comprimido)} bytes):")
     print(texto_comprimido)
 
-    texto_descomprimido = descomprimir_texto(texto_comprimido)
+    texto_descomprimido = descomprimir_texto(texto_comprimido, diccionario)
     print("\nTexto descomprimido:")
     print(texto_descomprimido)
 
